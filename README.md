@@ -1,54 +1,85 @@
-# JavaScript To-Do App Face-Off
+Amber
+=====
 
-In the last few years, several JavaScript application frameworks have emerged, all competing to be the
-tool-of-choice for building To-Do applications on the web. This is a contest to implement a to-do application
-with the **application framework of your choice**, and then compare and contrast your results with those of
-other forks of the repo.
+By Nicolas Petton <petton.nicolas@gmail.com>
 
-## Instructions
+Amber is an implementation of the Smalltalk language that runs on top of the JavaScript runtime. It is designed to make client-side development faster and easier.
 
-0. Go play with a [working example](http://testdouble.github.com/todos/) of this Todo application.
+Overview
+--------
 
-1. Pick an app framework to use. Here are some frameworks you might try to implement this in:
+Amber is written in itself, including the parser and compiler. Amber compiles into efficient JavaScript, mapping one-to-one with the equivalent JavaScript. There is no interpretation at runtime.
 
-  * [backbone.js](http://documentcloud.github.com/backbone)
-  * [knockout.js](http://knockoutjs.com/)
-  * [ember.js](http://emberjs.com/)
-  * [batman.js](http://batmanjs.org/)
-  * [spine.js](http://spinejs.com/)
-  * [angular.js](http://angularjs.org/#/)
-  * [JavaScriptMVC](http://javascriptmvc.com/)
+Some highlights:
 
-2. Load the JavaScripts you'll need in `index.html`
+-    Amber features an IDE with a Class browser, Workspace, Transcript, a ReferencesBrowser supporting senders/implementors and class references, basic Inspector and even a beginning of a Debugger and a unit TestRunner.
+-    [Pharo Smalltalk](http://www.pharo-project.org) is considered as the reference implementation.
+-    Amber includes a canvas to generate HTML, like [Seaside](http://www.seaside.st)
+-    Amber can use Javascript libraries and the current IDE is built on [jQuery](http://www.jquery.com)
+-    You can inline Javascript code and there are many ways to interact between Amber and Javascript
 
-3. (This step's important) Write the app!
+How to commit changes from the web-based IDE
+--------------------------------------------
 
-    You'll notice that client-side HTML templates are provided in `<script>` tags in `index.html`. To
-    get at the default HTML template for the main application view, you might do this with jQuery:
+The Amber class browser is able to commit changes to disk.
+The "commit category" button will send a PUT request with the JS code of all classes in the selected class category in a file named js/CATEGORY.js and also send the corresponding .st files to the st directory.
 
-    ``` javascript
-    $('#item-template').html();
-    ```
+The easiest way to enable committing is probably to use the nodejs server or to setup a webdav with Apache.
 
-    From that point, most JavaScript app frameworks have a facility or convention for applying client-side templates.
+To start the local server:
 
-4. Make the specs pass
+./bin/server
 
-    There are several Jasmine specs included (you'll probably notice the runner output on the bottom of the page).
-    Prove your implementation is the greatest by making them go green! You can find the specs in `spec/todos-spec.js`
+then go to http://localhost:4000
 
-    At the top of the spec file, there's a `window.todoAppDriver` object which defines a few methods for interacting with
-    the application. These methods work great with Jérôme's backbone.js example, but your mileage may vary. Feel free
-    to override those methods as necessary so that the specs know how to create, read, update, and delete to-dos in
-    your version of the app.
+The following steps explain how to setup a webdav for Amber with Debian, but the setup on OSX and other Linux distros should be similar.
 
-5. Compare your results!
+### Install Apache and enable the dav module
 
-    With the benefit of hindsight, check out how others implemented their applications by
-    pulling down [other forks](https://github.com/testdouble/todos/network) of this repo.
+    apt-get install apache2
+    a2enmod dav
+    a2enmod dav_fs
 
-### Thanks
+### Create a password for the webdav
 
-The repo comes with the web assets from [Jérôme Gravel-Niquet](http://jgn.me/)'s
-[Todo List example](http://documentcloud.github.com/backbone/examples/todos/index.html) for
-[backbone.js](http://documentcloud.github.com/backbone).
+    htpasswd -c /etc/apache2/htpasswd-webdav USERNAME
+
+### Setup the webdav for Amber
+
+Add the following lines to the default vhost (in /etc/apache2/sites-available/default):
+
+    Alias /amber/ "/path/to/amber/"
+        <Directory "/path/to/amber/">
+            Options Indexes MultiViews FollowSymLinks
+	    DirectoryIndex index.html
+	    AllowOverride None
+    	    Order allow,deny
+	    allow from all
+
+	    Dav on
+
+	    AuthType Basic
+            AuthName "amber"
+            AuthUserFile /etc/apache2/htpasswd-webdav
+	    <LimitExcept GET OPTIONS>
+                Require valid-user
+	    </LimitExcept>
+
+        </Directory>
+
+
+Make sure the group www-data has required rights to modify files in the webdav directory.
+
+### Restart Apache
+    
+    /etc/init.d/apache2 restart
+
+License
+-------
+
+Amber is released under the MIT license. All contributions made for inclusion are considered to be under MIT.
+
+More infos
+----------
+
+More on the [project page](http://nicolaspetton.github.com/amber)
